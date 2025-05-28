@@ -4,7 +4,7 @@ COMPOSE=docker compose -f infrastructure/docker-compose.yml --project-name $(PRO
 # Levanta solo infraestructura: API, DB y MLflow (NO training)
 up:
 	set -a; . .env; set +a; \
-	docker compose -f infrastructure/docker-compose.yml --project-name $(PROJECT_NAME) up api postgres minio minio-create-bucket mlflow --build
+	docker compose -f infrastructure/docker-compose.yml --project-name $(PROJECT_NAME) up api postgres minio minio-create-bucket mlflow training --build
 
 down:
 	set -a; . .env; set +a; \
@@ -14,6 +14,7 @@ down:
 # Lanza entrenamiento puntual (run + destroy)
 train:
 	set -a; . .env; set +a; \
+	docker compose -f infrastructure/docker-compose.yml --project-name $(PROJECT_NAME) build training && \
 	docker compose -f infrastructure/docker-compose.yml --project-name $(PROJECT_NAME) run --rm --no-deps training
 
 # Logs en tiempo real
