@@ -10,6 +10,8 @@
 * ✅ Training script that registers the model in MLflow
 * ✅ Dockerized infrastructure for local deployment
 * ✅ Simple and clean project structure with tests
+* ✅ Environment-based configuration management
+* ✅ Modular architecture with clear separation of concerns
 
 ## 📦 Project Structure and Components
 
@@ -20,25 +22,26 @@ The API module implements the REST interface using FastAPI:
 * `routes.py`: API endpoint definitions and request handling
 * `models.py`: Pydantic models for request/response validation
 * `services.py`: Business logic and model serving
-* `config.py`: API configuration and environment variables
+* `settings.py`: API configuration and environment variables
 
 ### Training Module (`/training`)
 Contains the model training pipeline:
 
 * `train.py`: Training script that:
-  - Loads the diabetes dataset (demo purposes)
+  - Loads the California Housing dataset from scikit-learn
   - Trains a Ridge regression model
   - Logs metrics and parameters to MLflow
   - Registers the model in MLflow Model Registry
   - Supports hyperparameter tuning via environment variables
+* `settings.py`: Training configuration and environment variables
 
 ### Infrastructure (`/infrastructure`)
 Docker and deployment configuration:
 
 * **Dockerfiles**:
-  - `Dockerfile.api`: FastAPI application container
-  - `Dockerfile.training`: Training environment container
-  - `Dockerfile.mlflow`: MLflow server container
+  - `api/Dockerfile`: FastAPI application container
+  - `train/Dockerfile`: Training environment container
+  - `mlflow/Dockerfile`: MLflow server container
 
 * **Docker Compose** (`docker-compose.yml`):
   - FastAPI application service
@@ -57,12 +60,11 @@ Docker and deployment configuration:
     1. Stores prediction logs from the API
     2. Acts as MLflow backend store for experiment tracking and model registry
   - MLflow is configured to use PostgreSQL with a dedicated schema
-  - Database initialization handled through `init.sql`
+  - Database initialization handled through `postgres/init.sql`
 
 * **Requirements**:
-  - `requirements.txt`: Common dependencies
-  - `requirements.api.txt`: API-specific dependencies
-  - `requirements.training.txt`: Training-specific dependencies
+  - `infrastructure/api/requirements.txt`: API-specific dependencies
+  - `infrastructure/train/requirements.txt`: Training-specific dependencies
 
 ## 🧠 Why FastAPI?
 MLServe uses FastAPI as its web framework for serving predictions. The decision was made after evaluating several popular options (Flask, Django, etc.) and considering the specific needs of an ML-as-a-Service project.
@@ -81,13 +83,13 @@ FastAPI was chosen for the following reasons:
 
 ### Prerequisites
 - Docker and Docker Compose
-- Python 3.8+ (for local development)
+- Python 3.12+
 
 ### Quick Start
 ```bash
 # 1. Clone repository
-git clone https://github.com/yourname/predictserve.git
-cd predictserve
+git clone https://github.com/yourname/ml-serve.git
+cd ml-serve
 
 # 2. Set up environment variables
 cp .env.example .env  # Configure as needed
@@ -95,13 +97,19 @@ cp .env.example .env  # Configure as needed
 # 3. Launch services
 docker-compose up --build
 
-# 4. Train and register a model
-python training/train.py
-
-# 5. Make a prediction
+# 4. Make a prediction
 curl -X POST http://localhost:8000/predict \
      -H "Content-Type: application/json" \
-     -d '{"feature1": 5.1, "feature2": 3.5, ...}'
+     -d '{
+       "MedInc": 6.5,
+       "HouseAge": 30.0,
+       "AveRooms": 5.8,
+       "AveBedrms": 1.1,
+       "Population": 850.0,
+       "AveOccup": 2.8,
+       "Latitude": 34.12,
+       "Longitude": -118.35
+     }'
 ```
 
 ### Services
@@ -111,12 +119,13 @@ curl -X POST http://localhost:8000/predict \
 
 ## 📋 TODO
 
-* [ ] Define input schema for prediction
-* [ ] Add simple authentication (optional)
-* [ ] Add basic Streamlit frontend (optional)
-* [ ] Add model versioning strategy
-* [ ] Implement model monitoring
+* [ ] Add comprehensive API documentation
+* [ ] Implement model versioning strategy
+* [ ] Add model monitoring and drift detection
 * [ ] Add CI/CD pipeline
+* [ ] Add integration tests
+* [ ] Add performance benchmarks
+* [ ] Add model explainability features
 
 ## 🧑‍💻 Author
 
