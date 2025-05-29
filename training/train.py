@@ -95,7 +95,6 @@ def train_and_log_model():
             registered_model_name=MODEL_NAME
         )
 
-        print(f"✅ Modelo registrado con RMSE={rmse:.3f}")
 
         # Asignar alias
         client = MlflowClient()
@@ -103,7 +102,6 @@ def train_and_log_model():
         latest_version = max(int(v.version) for v in latest_versions)
 
         client.set_registered_model_alias(MODEL_NAME, MODEL_ALIAS, str(latest_version))
-        print(f"🏷️ Alias '{MODEL_ALIAS}' asignado a la versión {latest_version}")
 
 if __name__ == "__main__":
     train_and_log_model()
