@@ -12,4 +12,4 @@ RUN pip install --no-cache-dir -r /tmp/requirements.txt
 COPY . .
 
 # Comando por defecto (puede ser sobreescrito desde docker-compose)
-CMD ["python", "training/train.py"]
+CMD ["python", "-m", "training.train"]

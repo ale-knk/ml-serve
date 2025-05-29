@@ -90,7 +90,8 @@ services:
       dockerfile: infrastructure/train/Dockerfile
 
     container_name: mlserve-training
-    command: ["python", "training/train.py"]
+    command: >
+      python -m training.train
     env_file:
       - ../.env
     depends_on:
