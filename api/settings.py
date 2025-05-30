@@ -1,5 +1,6 @@
 # settings.py
 import os
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -10,4 +11,6 @@ MODEL_ALIAS = os.getenv("MODEL_ALIAS", "production")
 POSTGRES_USER = os.getenv("POSTGRES_USER", "user")
 POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "password")
 POSTGRES_DB = os.getenv("POSTGRES_DB", "mlserve")
-DATABASE_URL = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@postgres:5432/{POSTGRES_DB}"
+DATABASE_URL = (
+    f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@postgres:5432/{POSTGRES_DB}"
+)

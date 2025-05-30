@@ -1,10 +1,12 @@
-from fastapi import FastAPI
-from api.routes import router
 import logging
 import sys
+
+from api.routes import router
 from dotenv import load_dotenv
+from fastapi import FastAPI
 
 load_dotenv()
+
 
 def setup_logging():
     """Configure the root logger with console output and proper formatting."""
@@ -15,12 +17,13 @@ def setup_logging():
     console_handler.setLevel(logging.INFO)
 
     formatter = logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S'
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
     )
     console_handler.setFormatter(formatter)
 
     root_logger.addHandler(console_handler)
+
 
 setup_logging()
 
@@ -30,6 +33,7 @@ logger = logging.getLogger(__name__)
 app = FastAPI(title="MLServe API", version="1.0")
 
 app.include_router(router)
+
 
 @app.get("/")
 def root():
