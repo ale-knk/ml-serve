@@ -1,31 +1,22 @@
 PROJECT_NAME=mlserve
-COMPOSE=docker compose -f infrastructure/docker-compose.yml --project-name $(PROJECT_NAME)
+include .env
+export $(shell sed 's/=.*//' .env)
 
-# Levanta solo infraestructura: API, DB y MLflow (NO training)
 up:
-	set -a; . .env; set +a; \
-	docker compose -f infrastructure/docker-compose.yml --project-name $(PROJECT_NAME) up api postgres pgadmin minio minio-create-bucket mlflow training --build
+	set -a; . .env; set +a;
+	docker compose -f infrastructure/docker-compose.yml -p $(PROJECT_NAME) up --build -d postgres minio
+	docker compose -f infrastructure/docker-compose.yml -p $(PROJECT_NAME) up --build -d minio-create-bucket
+	docker compose -f infrastructure/docker-compose.yml -p $(PROJECT_NAME) up --build -d mlflow pgadmin
+	docker compose -f infrastructure/docker-compose.yml -p $(PROJECT_NAME) up --build -d init-db
+	docker compose -f infrastructure/docker-compose.yml -p $(PROJECT_NAME) up --build -d api
+	docker compose -f infrastructure/docker-compose.yml -p $(PROJECT_NAME) up --build -d training
 
 down:
 	set -a; . .env; set +a; \
 	docker compose -f infrastructure/docker-compose.yml --project-name $(PROJECT_NAME) down -v
 
-
-# Lanza entrenamiento puntual (run + destroy)
 train:
 	set -a; . .env; set +a; \
 	docker compose -f infrastructure/docker-compose.yml --project-name $(PROJECT_NAME) build training && \
 	docker compose -f infrastructure/docker-compose.yml --project-name $(PROJECT_NAME) run --rm --no-deps training
-
-# Logs en tiempo real
-logs:
-	$(COMPOSE) logs -f
-
-# Lista de contenedores activos
-ps:
-	$(COMPOSE) ps
-
-# Construye todas las imágenes (por si quieres forzar build sin levantar)
-build:
-	$(COMPOSE) build
 
