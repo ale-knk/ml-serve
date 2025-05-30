@@ -1,20 +1,20 @@
 # training/trainer.py
+import os
+from pathlib import Path
+
 import mlflow
 import mlflow.sklearn
-from mlflow.tracking import MlflowClient
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_squared_error
-from sklearn.datasets import fetch_california_housing
-from sklearn.pipeline import Pipeline
-from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
-from sklearn.linear_model import LinearRegression
-from sklearn.preprocessing import StandardScaler
-from sklearn.decomposition import PCA
-
 import yaml
-from pathlib import Path
-import os
 from dotenv import load_dotenv
+from mlflow.tracking import MlflowClient
+from sklearn.datasets import fetch_california_housing
+from sklearn.decomposition import PCA
+from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
 
 load_dotenv()
 
@@ -32,6 +32,7 @@ def load_config() -> dict:
     with open(config_file, "r") as f:
         return yaml.safe_load(f)
 
+
 def get_model(model_config: dict):
     model_type = model_config.get("type", "").lower()
     params = model_config.get("params", {})
@@ -44,6 +45,7 @@ def get_model(model_config: dict):
         return LinearRegression(**params)
     else:
         raise ValueError(f"Modelo no soportado: {model_type}")
+
 
 def create_pipeline(config: dict) -> Pipeline:
     steps = []
@@ -60,6 +62,7 @@ def create_pipeline(config: dict) -> Pipeline:
     steps.append(("regressor", model))
 
     return Pipeline(steps)
+
 
 def train_and_log_model():
     config = load_config()
@@ -90,11 +93,8 @@ def train_and_log_model():
         mlflow.log_artifact(CONFIG_PATH, artifact_path="config")
 
         mlflow.sklearn.log_model(
-            pipeline,
-            artifact_path="model",
-            registered_model_name=MODEL_NAME
+            pipeline, artifact_path="model", registered_model_name=MODEL_NAME
         )
-
 
         # Asignar alias
         client = MlflowClient()
@@ -102,6 +102,7 @@ def train_and_log_model():
         latest_version = max(int(v.version) for v in latest_versions)
 
         client.set_registered_model_alias(MODEL_NAME, MODEL_ALIAS, str(latest_version))
+
 
 if __name__ == "__main__":
     train_and_log_model()
