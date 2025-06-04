@@ -1,3 +1,5 @@
+import logging
+
 import mlflow
 from db.client import db
 from db.models import PredictionFeedback
@@ -8,30 +10,32 @@ from mlflow_utils.model_io import (
     register_model,
 )
 from model.utils import eval_model, load_data
-from utils.settings import MIN_IMPROVEMENT_DELTA
+from utils.settings import MODEL_CONFIG_PATH
+
+logger = logging.getLogger(__name__)
 
 
 def retrain_if_enough_feedback(min_feedbacks: int = 10):
-    print("Retraining if enough feedback")
-    print("Configuring MLflow")
+    logger.info("Starting retraining process")
+    logger.info("Configuring MLflow")
     configure_mlflow()
 
-    print("Loading data")
+    logger.info("Loading data")
     X_train, X_test, y_train, y_test = load_data(include_feedback=True)
 
-    print("Loading feedbacks")
+    logger.info("Loading feedbacks")
     feedbacks = (
         db.query(PredictionFeedback)
-        .filter(PredictionFeedback.used_in_retraining_run_id == None)
+        .filter(PredictionFeedback.retraining_run_id == None)
         .all()
     )
     if len(feedbacks) < min_feedbacks:
-        print(f"Not enough feedbacks ({len(feedbacks)} < {min_feedbacks})")
+        logger.info(f"Not enough feedbacks ({len(feedbacks)} < {min_feedbacks})")
         return
 
-    print("Loading latest model")
+    logger.info("Loading latest model")
     model = load_latest_model()
-    print("Evaluating current model")
+    logger.info("Evaluating current model")
     current_rmse = eval_model(model, X_test, y_test)
 
     with mlflow.start_run() as run:
@@ -39,19 +43,24 @@ def retrain_if_enough_feedback(min_feedbacks: int = 10):
         new_rmse = eval_model(model, X_test, y_test)
 
         mlflow.log_metric("rmse", float(new_rmse))
-        mlflow.log_param("retrain_feedbacks", len(feedbacks))
+        mlflow.log_artifact(MODEL_CONFIG_PATH, artifact_path="config")
+
         log_model(model)
 
-        if current_rmse - new_rmse >= MIN_IMPROVEMENT_DELTA:
-            print("Promoting new model to production")
+        if new_rmse < current_rmse:
+            logger.info("Promoting new model to production")
             register_model(run_id=run.info.run_id, alias="production")
 
             for fb in feedbacks:
-                fb.used_in_retraining_run_id = run.info.run_id
+                fb.retraining_run_id = run.info.run_id
             db.commit()
         else:
-            print("New model is not better — not promoted")
+            logger.info("New model is not better — not promoted")
 
 
 if __name__ == "__main__":
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    )
     retrain_if_enough_feedback()

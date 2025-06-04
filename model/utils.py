@@ -38,7 +38,7 @@ def get_feedback_data():
     query = (
         db.query(PredictionLog.input_data, PredictionFeedback.feedback)
         .join(PredictionFeedback, PredictionLog.id == PredictionFeedback.prediction_id)
-        .filter(PredictionFeedback.used_in_retraining_run_id == None)
+        .filter(PredictionFeedback.retraining_run_id == None)
     )
 
     rows = query.all()
