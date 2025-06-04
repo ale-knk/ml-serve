@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
   postgres:
     image: postgres:15
@@ -137,16 +135,36 @@ services:
       timeout: 5s
       retries: 10
 
-  training:
+  train:
     build:
       context: ..
       dockerfile: infra/train/Dockerfile
-    container_name: training
+    container_name: train
     env_file:
       - ../.env
     depends_on:
       api:
         condition: service_healthy
+    # healthcheck:
+    #   test: ["CMD-SHELL", "curl -fs http://api:8000/model-info | grep 'name' || exit 1"]
+    #   interval: 10s
+    #   timeout: 5s
+    #   retries: 5
+    networks:
+      - mlserve-network
+
+  retrain:
+    build:
+      context: ..
+      dockerfile: infra/retrain/Dockerfile
+    container_name: retrain
+    volumes:
+      - ../:/app
+    env_file:
+      - ../.env
+    # depends_on:
+    #   train:
+    #     condition: service_healthy
     networks:
       - mlserve-network
 

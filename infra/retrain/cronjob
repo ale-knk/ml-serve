@@ -1,0 +1,1 @@
+* * * * * cd /app && /usr/local/bin/python -m model.retrain >> /var/log/cron.log 2>&1
