@@ -9,11 +9,9 @@
 *   ✅ Logging of all predictions in PostgreSQL
 *   ✅ MINIO as S3-compatible artifact storage for MLflow
 *   ✅ Feedback collection system for model predictions
-*   ✅ Automated retraining pipeline based on collected feedback
 *   ✅ Training script that registers the model in MLflow
+*   ✅ Automated retraining pipeline based on collected feedback
 *   ✅ Dockerized infrastructure for local deployment
-*   ✅ Simple and clean project structure with tests
-*   ✅ Environment-based configuration management
 *   ✅ Modular architecture with clear separation of concerns
 
 
@@ -37,9 +35,12 @@ cd ml-serve
 cp .env.example .env  # Configure as needed
 
 # 3. Launch services
-make up
+make up # This can take a while for the first time
 
-# 4. Make a prediction
+# 4. Get info about latest model
+curl -X GET http://localhost:8000/model-info
+
+# 5. Make a prediction
 curl -X POST http://localhost:8000/predict \
      -H "Content-Type: application/json" \
      -d '{
@@ -52,6 +53,19 @@ curl -X POST http://localhost:8000/predict \
        "Latitude": 34.12,
        "Longitude": -118.35
      }'
+
+# 6. Send feedback
+curl -X POST http://localhost:8000/feedback \
+     -H "Content-Type: application/json" \
+     -d '{
+       "prediction_id": 1,
+       "feedback":1.4
+     }' 
+
+
+# (OPTIONAL) For checking retraining activities
+python scripts/simulate_activity.py #This will send some predictions and feedback
+docker logs retrain #Logs will inform about retraining status.
 ```
 
 
@@ -126,6 +140,7 @@ Docker and deployment configuration:
         *   Perfect for local development and testing
         *   Seamless transition to AWS S3 in production
     *   Training service
+    *   Retraining service (CRON Job)
     *   Database initialization service
 
 *   **Storage Integration**:
@@ -173,11 +188,11 @@ FastAPI was chosen for the following reasons:
 
 ### Services
 
+Given the `.env.example` file, once services are up, you can navigate into:
 *   **FastAPI:** <http://localhost:8000>
 
-*   **MLflow UI:** <http://localhost:5000>
-*   **PostgreSQL:** <http://localhost:5432>
-*   **PGAdmin UI:** <http://localhost:5050>
+*   **MLflow UI:** <http://localhost:5555>
+*   **PGAdmin UI:** <http://localhost:5500>
 *   **MINIO UI:** <http://localhost:9001>
 
 ## 📋 TODO
@@ -187,8 +202,7 @@ FastAPI was chosen for the following reasons:
 *   [ ] Add model monitoring and drift detection
 *   [ ] Add CI/CD pipeline
 *   [ ] Add integration tests
-*   [ ] Add performance benchmarks
-*   [ ] Add model explainability features
+
 
 ## 🧑‍💻 Author
 
