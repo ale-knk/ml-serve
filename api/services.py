@@ -51,6 +51,7 @@ def log_prediction(
     db.add(log)
     db.commit()
     db.refresh(log)
+    db.flush()
     return log
 
 
@@ -79,7 +80,7 @@ def predict(request: PredictionRequest) -> PredictionResponse:
 
     prediction = model.predict(input_array)[0]
 
-    log_prediction(
+    log = log_prediction(
         input_data=request.model_dump(),
         prediction=prediction,
         model_name=MODEL_NAME,
@@ -95,6 +96,7 @@ def predict(request: PredictionRequest) -> PredictionResponse:
 
     return PredictionResponse(
         prediction=prediction,
+        prediction_id=log.id,
         model_name=MODEL_NAME,
         model_version=model_info["version"],
         model_metadata={

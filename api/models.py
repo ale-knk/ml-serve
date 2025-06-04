@@ -15,6 +15,7 @@ class PredictionRequest(BaseModel):
 
 class PredictionResponse(BaseModel):
     prediction: float
+    prediction_id: int
     model_name: str
     model_version: str
     model_metadata: Dict[str, Any]
