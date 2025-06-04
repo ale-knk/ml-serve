@@ -4,16 +4,20 @@
 
 ## 🚀 Features
 
-*   ✅ REST API with FastAPI
-*   ✅ Model loading from MLflow Registry
-*   ✅ Logging of all predictions in PostgreSQL
-*   ✅ MINIO as S3-compatible artifact storage for MLflow
-*   ✅ Feedback collection system for model predictions
-*   ✅ Training script that registers the model in MLflow
-*   ✅ Automated retraining pipeline based on collected feedback
-*   ✅ Dockerized infrastructure for local deployment
-*   ✅ Modular architecture with clear separation of concerns
+*   ✅ **REST API with FastAPI:** Exposes the ML model with well-defined routes and automatic data validation.
+*   ✅ **Automatic model loading from MLflow:** Fetching the latest production version from MLflow Model Registry to ensure consistent deployments.
 
+*   ✅ **Prediction logging in PostgreSQL:** All requests and results are stored in a relational database for auditing and usage analysis.
+
+*   ✅ **Artifact storage in MINIO (S3-compatible):** Managed MLflow artifacts locally with an easy path to migrate to AWS S3.
+
+*   ✅ **Feedback system for continuous improvement:** Capture user feedback on predictions, enabling model refinement.
+
+*   ✅ **Automated retraining pipeline:** Scheduled tasks (cron jobs) that collect feedback, retrain the model, and register new versions in MLflow without manual intervention.
+
+*   ✅ **Dockerized containers for reproducible local deployment:** Isolated images for API, training, MLflow, database, and MINIO, orchestrated via Docker Compose.
+
+*   ✅ **Modular, maintainable architecture:** Clear separation between API layer, business logic, data management, and training module, facilitating extensions and testing.
 
 
 ## ⚙️ How to Run
